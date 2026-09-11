@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 //Constants and Globals
-const PRONOUSN = ["io", "tu", "lui/lei", "noi", "voi", "loro"];
+const PRONOUNS = ["io", "tu", "lui/lei", "noi", "voi", "loro"];
 const AVERE_PRESENT = ["ho", "hai", "ha", "abbiamo", "avete", "hanno"];
 const ESSERE_PRESENT = ["sono", "sei", "è", "siamo", "siete", "sono"];
 
@@ -53,8 +53,8 @@ export default function App(){
             const parser = new DOMParser();
             const document = parser.parseFromString(rawHTML, "text/html");
 
-            const italianHeading = document.querySelector("h2:has(#Italian), #Italian");
-            const italianTable = document.querySelector("table.roa-inflection-table");
+            const italianHeading = document.querySelectorAll("h2:has(#Italian), #Italian");
+            const italianTable = document.querySelectorAll("table.roa-inflection-table");
 
             if (italianHeading == null){
                 setError(cleanVerb + " has no Italian entry.")
@@ -66,6 +66,7 @@ export default function App(){
                 setLoading(false);
                 return;
             }
+            //***** This segment finds and extracts the auxiliary verb and past participle *****//
             let aux = null;
             let pastPart = null;
             const tableHeading = document.querySelector("th");
@@ -81,12 +82,61 @@ export default function App(){
                 if (headerContent === "past participle"){
                     const nextContent = headerContent.nextElementSibling;
                     if (nextContent != null){
+                        //This grabs and stores the past participle (i.e. parlato)
                         pastPart = nextContent.replace(/[\[\]()\d]/g, '').trim().toLowerCase();
                     }
                 }
+            }
+            //***** This segment finds and extracts the auxiliary verb and past participle *****//
+            const presentConjugation = {};
+            const tableRow = document.querySelector("tr");
+            for (let i = 0; i < tableRow.length; i++){
+                const row = tableRow[i];
+                const rowHeader = row.querySelector("th");
+                if (rowHeader != null){
+                    const rowTitle = rowHeader.textContent.replace(/[\[\]()\d]/g, '').trim().toLowerCase();
 
+                    // ****** This segment isolates the pronouns found in the present tense conjugations
+                    if (rowTitle === "present"){
+                        const rowData = row.querySelectorAll("td")
+                        for (let j = 0; j < PRONOUNS.length; j++){
+                            if (j < rowData.length){
+                                const currentPronoun = PRONOUNS[i];
+                                const conjugatedWord = rowData.textContent.replace(/[\[\]()\d]/g, '').trim().toLowerCase();
+                                presentConjugation[currentPronoun] = conjugatedWord;
+                            }
+                        }
+                        break;
+                    }
+                    // ****** This segment isolates the pronouns found in the present tense conjugations.
+                }
             }
 
+            // ****** This segment builds the past tense conjugations ******
+            let selectedAuxList = AVERE_PRESENT;
+            if (aux.includes("ess")){
+                selectedAuxList = ESSERE_PRESENT;
+            }
+            const pastConjugation = {};
+            for (let i = 0; i < PRONOUNS.length; i++){
+                const currentPronoun = PRONOUNS[i];
+                //aux text looks at the element within each of the pronouns, first run: auxText = Ho
+                const auxText = selectedAuxList[i];
+                pastConjugation[currentPronoun] = auxText + " " + pastPart;
+            }
+            // ****** This segment builds the past tense conjugations ******
+
+            setResult = ({
+                verb: cleanVerb,
+                aux: auxText,
+                pastPart: pastConjugation,
+                present: presentConjugation,
+                past: pastConjugation,
+            });
+        }catch (e) {
+            setError("Failed to find verb" + e.message);
+        }finally{
+            setLoading(false);
         }
     }
 
