@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useState} from "react";
 
 //Constants and Globals
 const PRONOUNS = ["io", "tu", "lui/lei", "noi", "voi", "loro"];
@@ -18,7 +18,7 @@ const ESSERE_PRESENT = ["sono", "sei", "è", "siamo", "siete", "sono"];
 
 export default function App(){
     const [verb, setVerb] = useState("");
-    const [result, setResult] = useState(null);
+    let [result, setResult] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
 
@@ -51,10 +51,10 @@ export default function App(){
 
             const rawHTML = data.parse.text["*"];
             const parser = new DOMParser();
-            const document = parser.parseFromString(rawHTML, "text/html");
+            const parsedDoc = parser.parseFromString(rawHTML, "text/html");
 
-            const italianHeading = document.querySelectorAll("h2:has(#Italian), #Italian");
-            const italianTable = document.querySelectorAll("table.roa-inflection-table");
+            const italianHeading = parsedDoc.querySelector("h2:has(#Italian), #Italian");
+            const italianTable = parsedDoc.querySelector("table.roa-inflection-table");
 
             if (italianHeading == null){
                 setError(cleanVerb + " has no Italian entry.")
@@ -69,27 +69,27 @@ export default function App(){
             //***** This segment finds and extracts the auxiliary verb and past participle *****//
             let aux = null;
             let pastPart = null;
-            const tableHeading = document.querySelector("th");
+            const tableHeading = italianTable.querySelectorAll("th");
             for (let i = 0; i < tableHeading.length; i++){
                 const header = tableHeading[i];
-                const headerContent = header.textContent().toLowerCase();
+                const headerContent = header.textContent.toLowerCase();
                 if (headerContent === "auxiliary verb"){
-                    const nextContent = headerContent.nextElementSibling;
+                    const nextContent = header.nextElementSibling;
                     if (nextContent != null){
-                        aux = nextContent.replace(/[\[\]()\d]/g, '').trim().toLowerCase();
+                        aux = nextContent.textContent.replace(/[\[\]()\d]/g, '').trim().toLowerCase();
                     }
                 }
                 if (headerContent === "past participle"){
-                    const nextContent = headerContent.nextElementSibling;
+                    const nextContent = header.nextElementSibling;
                     if (nextContent != null){
                         //This grabs and stores the past participle (i.e. parlato)
-                        pastPart = nextContent.replace(/[\[\]()\d]/g, '').trim().toLowerCase();
+                        pastPart = nextContent.textContent.replace(/[\[\]()\d]/g, '').trim().toLowerCase();
                     }
                 }
             }
             //***** This segment finds and extracts the auxiliary verb and past participle *****//
             const presentConjugation = {};
-            const tableRow = document.querySelector("tr");
+            const tableRow = italianTable.querySelectorAll("tr");
             for (let i = 0; i < tableRow.length; i++){
                 const row = tableRow[i];
                 const rowHeader = row.querySelector("th");
@@ -98,12 +98,11 @@ export default function App(){
 
                     // ****** This segment isolates the pronouns found in the present tense conjugations
                     if (rowTitle === "present"){
-                        const rowData = row.querySelectorAll("td")
+                        const rowData = row.querySelectorAll("td");
                         for (let j = 0; j < PRONOUNS.length; j++){
                             if (j < rowData.length){
-                                const currentPronoun = PRONOUNS[i];
-                                const conjugatedWord = rowData.textContent.replace(/[\[\]()\d]/g, '').trim().toLowerCase();
-                                presentConjugation[currentPronoun] = conjugatedWord;
+                                const currentPronoun = PRONOUNS[j];
+                                presentConjugation[currentPronoun] = rowData[j].textContent.replace(/[\[\]()\d]/g, '').trim().toLowerCase();
                             }
                         }
                         break;
@@ -114,7 +113,7 @@ export default function App(){
 
             // ****** This segment builds the past tense conjugations ******
             let selectedAuxList = AVERE_PRESENT;
-            if (aux.includes("ess")){
+            if (aux != null && aux.includes("ess")){
                 selectedAuxList = ESSERE_PRESENT;
             }
             const pastConjugation = {};
@@ -126,15 +125,15 @@ export default function App(){
             }
             // ****** This segment builds the past tense conjugations ******
 
-            setResult = ({
+            setResult({
                 verb: cleanVerb,
-                aux: auxText,
-                pastPart: pastConjugation,
+                aux: aux,
+                pastPart: pastPart,
                 present: presentConjugation,
                 past: pastConjugation,
             });
         }catch (e) {
-            setError("Failed to find verb" + e.message);
+            setError("Failed to find verb " + e.message);
         }finally{
             setLoading(false);
         }
