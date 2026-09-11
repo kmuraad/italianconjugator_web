@@ -20,7 +20,7 @@ export default function App(){
     const [verb, setVerb] = useState("");
     let [result, setResult] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
+    const [error, setError] = useState(null);
 
     function handleInput(event){
         setVerb(event.target.value);
@@ -44,7 +44,7 @@ export default function App(){
             const data = await response.json();
 
             if (!data.parse || !data.parse.text){
-                setError('"' + cleanVerb + '" is not recognized."');
+                setError("Error!");
                 setLoading(false);
                 return;
             }
@@ -57,12 +57,12 @@ export default function App(){
             const italianTable = parsedDoc.querySelector("table.roa-inflection-table");
 
             if (italianHeading == null){
-                setError(cleanVerb + " has no Italian entry.")
+                setError("Error!")
                 setLoading(false);
                 return;
             }
             else if (italianTable == null){
-                setError(cleanVerb + " has no Italian conjugation table.")
+                setError("Error!")
                 setLoading(false);
                 return;
             }
@@ -126,17 +126,36 @@ export default function App(){
             // ****** This segment builds the past tense conjugations ******
 
             setResult({
-                verb: cleanVerb,
-                aux: aux,
-                pastPart: pastPart,
                 present: presentConjugation,
                 past: pastConjugation,
             });
         }catch (e) {
-            setError("Failed to find verb " + e.message);
+            setError("Error! " + e.message);
         }finally{
             setLoading(false);
         }
-    }
 
+    }
+    return(
+        <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
+            <form onSubmit={handleSearch}>
+                <input
+                    type="text"
+                    value={verb}
+                    onChange={handleInput}
+                />
+                <button type="submit" disabled={loading}>
+                    {loading ? "Searching..." : "Conjugate"}
+                </button>
+            </form>
+            {error && <p style={{ color: "red" }}>{error}</p>}
+
+            {result && (
+                <div style={{ marginTop: "20px" }}>
+                    <h2>{result.verb}</h2>
+                    <pre>{JSON.stringify(result, null, 2)}</pre>
+                </div>
+            )}
+        </div>
+    );
 }
