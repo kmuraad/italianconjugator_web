@@ -1,4 +1,5 @@
 import {useState} from "react";
+import logo from './assets/ItalianConjugator.svg';
 
 //Constants and Globals
 const PRONOUNS = ["io", "tu", "lui/lei", "noi", "voi", "loro"];
@@ -135,6 +136,13 @@ export default function App(){
     }
     return (
         <div style={{ padding: "20px", fontFamily: "sans-serif", font: "Helvetica", maxWidth: "600px", margin: "0 auto" }}>
+            <header style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
+                <img
+                    src={logo}
+                    alt="Conjugator Logo"
+                    style={{ width: "500px", height: "500px" }}
+                />
+            </header>
             <form onSubmit={handleSearch} style={{ display: "flex", gap: "8px" }}>
                 <input
                     type="text"
