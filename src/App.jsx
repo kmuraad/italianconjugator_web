@@ -134,16 +134,16 @@ export default function App(){
 
     }
     return (
-        <div style={{ padding: "20px", fontFamily: "sans-serif", maxWidth: "600px", margin: "0 auto" }}>
+        <div style={{ padding: "20px", fontFamily: "sans-serif", font: "Helvetica", maxWidth: "600px", margin: "0 auto" }}>
             <form onSubmit={handleSearch} style={{ display: "flex", gap: "8px" }}>
                 <input
                     type="text"
                     value={verb}
                     onChange={handleInput}
                     placeholder="Type of an Italian verb in Italian"
-                    style={{ flex: 1, padding: "8px 12px", fontSize: "16px" }}
+                    style={{ flex: 1, padding: "8px 12px", fontSize: "16px", fontFamily: "inherit" }}
                 />
-                <button type="submit" disabled={loading} style={{ padding: "8px 16px", fontSize: "16px", cursor: "pointer" }}>
+                <button type="submit" disabled={loading} style={{ padding: "8px 16px", fontSize: "16px", fontFamily: "inherit", cursor: "pointer" }}>
                     {loading ? "Searching..." : "Conjugate"}
                 </button>
             </form>
@@ -151,7 +151,7 @@ export default function App(){
             {error && <p style={{ color: "red" }}>{error}</p>}
 
             {result && (
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginTop: "24px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "54px", marginTop: "54px" }}>
                     {/* Present */}
                     <div>
                         <h3 style={{ borderBottom: "1px solid #ccc", paddingBottom: "6px" }}>Present</h3>
