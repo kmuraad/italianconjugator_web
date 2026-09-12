@@ -69,32 +69,22 @@ export default function App(){
             //***** This segment finds and extracts the auxiliary verb and past participle *****//
             let aux = null;
             let pastPart = null;
-            const tableHeading = italianTable.querySelectorAll("td, th");
-            const tableHeading2 = italianTable.querySelectorAll("tr, th");
-            for (let i = 0; i < tableHeading2.length; i++){
-                const header = tableHeading2[i];
-                const headerContent = header.textContent.trim().toLowerCase();
-                if (headerContent.includes("auxiliary verb")){
-                    const nextContent = header.nextElementSibling;
-                    if (nextContent != null){
-                        aux = nextContent.textContent.replace(/[\[\]()\d]/g, '').trim().toLowerCase();
-                    }
-                }
-            }
-            for (let i = 0; i < tableHeading.length; i++){
-                const header = tableHeading[i];
-                const headerContent = header.textContent.trim().toLowerCase();
-                //*************************** ISSUE *********************************
-                if (headerContent === "past participle"){
-                    const nextContent = header.nextElementSibling;
-                    if (nextContent != null){
-                        //This grabs and stores the past participle (i.e. parlato)
-                        pastPart = nextContent.textContent.replace(/[\[\]()\d]/g, '').trim().toUpperCase();
-                    }
-                }
-            }
 
+            //allHeaders is an array of every th element that was captured from the italianTable parse.
+            const allHeaders = Array.from(italianTable.querySelectorAll("th"));
+            //Goes through all the elements within allHeaders array to find the th that reads 'auxiliary verb'
+            const auxHeader = allHeaders.find((th) => th.textContent.toLowerCase().includes("auxiliary verb"));
+            //if both the auxiliary verb exist and the next element to it, then...
+            if (auxHeader && auxHeader.nextElementSibling){
+                //we've found the auxiliary verb, which is then stored after stripping it of it's digits, spaces, and extracurriculars in 'aux'
+                aux = auxHeader.nextElementSibling.textContent.replace(/[\[\]()\d]/g, '').trim().toLowerCase();
+            }
+            const ppHeader = allHeaders.find((th) => th.textContent.toLowerCase().includes("past participle"));
+            if (ppHeader && ppHeader.nextElementSibling){
+                pastPart = ppHeader.nextElementSibling.textContent.replace(/[\[\]()\d]/g, '').trim().toLowerCase();
+            }
             //***** This segment finds and extracts the auxiliary verb and past participle *****//
+
             const presentConjugation = {};
             const tableRow = italianTable.querySelectorAll("tr");
             for (let i = 0; i < tableRow.length; i++){
@@ -120,7 +110,7 @@ export default function App(){
 
             // ****** This segment builds the past tense conjugations ******
             let selectedAuxList = AVERE_PRESENT;
-            if (aux != null && aux.includes("ess")){
+            if (aux != null && aux.includes("ess") || aux.includes("èss")){
                 selectedAuxList = ESSERE_PRESENT;
             }
             const pastConjugation = {};
@@ -150,7 +140,7 @@ export default function App(){
                     type="text"
                     value={verb}
                     onChange={handleInput}
-                    placeholder="e.g. parlare"
+                    placeholder="Type of an Italian verb in Italian"
                     style={{ flex: 1, padding: "8px 12px", fontSize: "16px" }}
                 />
                 <button type="submit" disabled={loading} style={{ padding: "8px 16px", fontSize: "16px", cursor: "pointer" }}>
@@ -162,9 +152,9 @@ export default function App(){
 
             {result && (
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginTop: "24px" }}>
-                    {/* Presente */}
+                    {/* Present */}
                     <div>
-                        <h3 style={{ borderBottom: "1px solid #ccc", paddingBottom: "6px" }}>Presente</h3>
+                        <h3 style={{ borderBottom: "1px solid #ccc", paddingBottom: "6px" }}>Present</h3>
                         <table style={{ width: "100%", borderCollapse: "collapse" }}>
                             <tbody>
                             {PRONOUNS.map((pronoun) => (
@@ -177,9 +167,25 @@ export default function App(){
                         </table>
                     </div>
 
-                    {/* Passato Prossimo */}
+                    {/* Future */}
                     <div>
-                        <h3 style={{ borderBottom: "1px solid #ccc", paddingBottom: "6px" }}>Passato Prossimo</h3>
+                        <h3 style={{ borderBottom: "1px solid #ccc", paddingBottom: "6px" }}>Future</h3>
+                        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                            <tbody>
+                            {PRONOUNS.map((pronoun) => (
+                                <tr key={pronoun} style={{ borderBottom: "1px solid #eee" }}>
+                                    <td style={{ padding: "6px 0", color: "#666" }}>{pronoun}</td>
+                                    <td style={{ padding: "6px 0", fontWeight: "bold" }}>{result.present[pronoun] || "—"}</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                    {/* Past */}
+                    <div>
+                        <h3 style={{ borderBottom: "1px solid #ccc", paddingBottom: "6px" }}>Past</h3>
                         <table style={{ width: "100%", borderCollapse: "collapse" }}>
                             <tbody>
                             {PRONOUNS.map((pronoun) => (
