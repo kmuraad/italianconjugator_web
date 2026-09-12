@@ -76,7 +76,7 @@ export default function App(){
             const auxHeader = allHeaders.find((th) => th.textContent.toLowerCase().includes("auxiliary verb"));
             //if both the auxiliary verb exist and the next element to it, then...
             if (auxHeader && auxHeader.nextElementSibling){
-                //we've found the auxiliary verb, which is then stored after stripping it of it's digits, spaces, and extracurriculars in 'aux'
+                //we've found the auxiliary verb, which is then stored after stripping it of its digits, spaces, and extracurriculars in 'aux'
                 aux = auxHeader.nextElementSibling.textContent.replace(/[\[\]()\d]/g, '').trim().toLowerCase();
             }
             const ppHeader = allHeaders.find((th) => th.textContent.toLowerCase().includes("past participle"));
